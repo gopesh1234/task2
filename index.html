@@ -344,9 +344,16 @@
                     <span>${comment.date}</span>
                     <button onclick="removeComment(${index})" class="remove-comment-btn">x</button>
                 `;
+
+                // Add a click event to fill the input with the clicked comment's text
+                commentItem.addEventListener('click', () => {
+                    document.getElementById('comment-input').value = comment.text;
+                });
+
                 commentsList.appendChild(commentItem);
             });
         }
+
 
         function addComment() {
             const commentInput = document.getElementById('comment-input');
