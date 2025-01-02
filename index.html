@@ -101,10 +101,10 @@
 
         #tasks {
             display: flex;
-            flex-wrap: wrap; /* Allows tasks to wrap onto the next row if needed */
-            gap: 15px; /* Adds spacing between tasks */
-            justify-content: center; /* Centers tasks horizontally */
-            padding: 20px 10px; /* Adds padding for spacing */
+            flex-wrap: wrap; /* Allows tasks to wrap onto the next row */
+            gap: 20px; /* Adjust spacing between tasks */
+            justify-content: center; /* Center tasks horizontally */
+            padding: 20px 10px;
         }
 
         .task {
@@ -115,10 +115,9 @@
             padding: 15px;
             background: rgba(255, 255, 255, 0.3); /* Semi-transparent for a glass effect */
             border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 50%; /* Makes the task circular */
+            border-radius: 15px; /* Adjusted for a box look */
             transition: transform 0.2s, background-color 0.2s;
-            width: 100px; /* Fixed width for consistent circles */
-            height: 100px; /* Fixed height for consistent circles */
+            width: 140px; /* Adjusted width */
             color: #444;
             text-align: center;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
@@ -130,27 +129,36 @@
             }
 
             .task p {
-                margin: 0;
-                font-size: 14px;
-                font-weight: 500;
+                margin: 0 0 10px 0; /* Add spacing below the task name */
+                font-size: 16px; /* Adjusted font size */
+                font-weight: bold;
             }
 
-            .task button {
-                padding: 7px 12px;
-                background: #1a73e8;
-                border: none;
-                color: #fff;
-                font-size: 12px;
-                border-radius: 7px;
-                cursor: pointer;
-                margin-top: 10px;
-                transition: background 0.3s, box-shadow 0.3s;
+        .task-buttons {
+            display: flex;
+            gap: 10px; /* Space between buttons */
+        }
+
+        .task button {
+            padding: 7px 12px;
+            background: #1a73e8;
+            border: none;
+            color: #fff;
+            font-size: 14px;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+            .task button:hover {
+                background: #145cb8;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             }
 
-                .task button:hover {
-                    background: #145cb8;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                }
+            .task button:nth-child(1) {
+                background-color: #cc0000; /* Red background */
+            }
+
 
         /* Comments Section */
         .comment-input {
@@ -269,13 +277,30 @@
                 taskName.textContent = `${task}: ${taskValue}`;
                 taskElement.appendChild(taskName);
 
+                const buttonsContainer = document.createElement('div');
+                buttonsContainer.classList.add('task-buttons');
+
+                const decrementButton = document.createElement('button');
+                decrementButton.textContent = "-";
+                decrementButton.addEventListener('click', () => decrementTask(task, taskName));
+                buttonsContainer.appendChild(decrementButton);
+
                 const incrementButton = document.createElement('button');
                 incrementButton.textContent = "+";
                 incrementButton.addEventListener('click', () => incrementTask(task, taskName));
-                taskElement.appendChild(incrementButton);
+                buttonsContainer.appendChild(incrementButton);
 
+
+                taskElement.appendChild(buttonsContainer);
                 tasksContainer.appendChild(taskElement);
             });
+        }
+
+        function decrementTask(task, taskNameElement) {
+            const currentValue = parseInt(localStorage.getItem(task), 10);
+            const newValue = Math.max(0, currentValue - 1); // Prevent negative values
+            localStorage.setItem(task, newValue);
+            taskNameElement.textContent = `${task}: ${newValue}`;
         }
 
         function incrementTask(task, taskNameElement) {
