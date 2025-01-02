@@ -219,6 +219,22 @@
             width: 50%;
             margin-top: 2%;
         }
+
+        .remove-comment-btn {
+            background-color: #ff4d4d; /* Red color for remove button */
+            border: none;
+            color: #fff;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+            .remove-comment-btn:hover {
+                background-color: #cc0000; /* Darker red on hover */
+            }
+
     </style>
 </head>
 <body>
@@ -315,10 +331,19 @@
             commentsList.innerHTML = '';
             const comments = JSON.parse(localStorage.getItem("comments")) || [];
 
-            comments.reverse().forEach(comment => {
+            // Reverse comments and render them from top to bottom
+            comments.reverse().forEach((comment, reversedIndex) => {
+                const index = comments.length - 1 - reversedIndex; // Correct original index of comment
+
                 const commentItem = document.createElement('div');
                 commentItem.classList.add('comment-item');
-                commentItem.innerHTML = `<strong>${comment.text}</strong><span>${comment.date}</span>`;
+
+                // Add the remove button with the original index
+                commentItem.innerHTML = `
+                    <strong>${comment.text}</strong>
+                    <span>${comment.date}</span>
+                    <button onclick="removeComment(${index})" class="remove-comment-btn">x</button>
+                `;
                 commentsList.appendChild(commentItem);
             });
         }
@@ -340,6 +365,20 @@
                 loadComments();
             }
         }
+
+        function removeComment(index) {
+            const comments = JSON.parse(localStorage.getItem("comments")) || [];
+
+            // Remove the comment at the specific index
+            comments.splice(index, 1);
+
+            // Save the updated comments back to localStorage
+            localStorage.setItem("comments", JSON.stringify(comments));
+
+            // Reload the comments list to reflect the change
+            loadComments();
+        }
+
 
         function clearStorage() {
             const inputValue = prompt("Enter the value to reset storage:");
@@ -385,6 +424,7 @@
                 loadComments();
             }
         }
+
 
         document.addEventListener('DOMContentLoaded', () => {
             initializeTasks();
