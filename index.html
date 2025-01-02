@@ -266,7 +266,7 @@
     </div>
 
     <script>
-        const tasks = ["Medicine", "Fast Food", "Brush", "Tea", "Morning Walk", "Morning Water", "Whatsapp Status", "Bath", "Petrol", "Movie", "Series", "Cold Drink"];
+        const tasks = ["Medicine", "Fast Food", "Brush", "Tea", "Mrng Walk", "Mrng Water", "Wapp Status", "Bath", "Petrol", "Movie", "Series", "Cold Drink"];
 
         function initializeTasks() {
             tasks.forEach(task => {
@@ -340,13 +340,13 @@
 
                 // Add the remove button with the original index
                 commentItem.innerHTML = `
-                    <strong>${comment.text}</strong>
-                    <span>${comment.date}</span>
-                    <button onclick="removeComment(${index})" class="remove-comment-btn">x</button>
-                `;
+                            <strong>${comment.text}</strong>
+                            <span>${comment.date}</span>
+                            <button ondblclick="removeComment(${index})" class="remove-comment-btn">x</button>
+                        `;
 
                 // Add a click event to fill the input with the clicked comment's text
-                commentItem.addEventListener('click', () => {
+                commentItem.addEventListener('dblclick', () => {
                     document.getElementById('comment-input').value = comment.text;
                 });
 
