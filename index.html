@@ -66,12 +66,12 @@
                 background: #145cb8;
             }
 
-        #tasks-container, #comments-container {
+        #tasks-container, #comments-container, #pending-container {
             display: none;
             flex-direction: column;
         }
 
-            #tasks-container.active, #comments-container.active {
+            #tasks-container.active, #comments-container.active, #pending-container.active {
                 display: flex;
             }
 
@@ -161,13 +161,13 @@
 
 
         /* Comments Section */
-        .comment-input {
+        .comment-input, .pending-input {
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
         }
 
-            .comment-input input {
+            .comment-input input, .pending-input input {
                 flex-grow: 1;
                 padding: 10px;
                 border: 1px solid #ddd;
@@ -175,7 +175,7 @@
                 font-size: 14px;
             }
 
-            .comment-input button {
+            .comment-input button, .pending-input button {
                 padding: 10px 20px;
                 background: #1a73e8;
                 border: none;
@@ -186,11 +186,11 @@
                 transition: background 0.3s;
             }
 
-                .comment-input button:hover {
+                .comment-input button:hover, .pending-input button:hover {
                     background: #145cb8;
                 }
 
-        .comments-list {
+        .comments-list, .pending-list {
             max-height: 200px;
             overflow-y: scroll;
             border: 1px solid #ddd;
@@ -198,13 +198,13 @@
             padding: 10px;
         }
 
-        .comment-item {
+        .comment-item, .pending-item {
             margin-bottom: 10px;
             padding: 5px;
             border-bottom: 1px solid #eee;
         }
 
-            .comment-item span {
+            .comment-item span, .pending-item span {
                 display: block;
                 font-size: 12px;
                 color: #666;
@@ -220,7 +220,7 @@
             margin-top: 2%;
         }
 
-        .remove-comment-btn {
+        .remove-comment-btn, .remove-pending-btn {
             background-color: #ff4d4d; /* Red color for remove button */
             border: none;
             color: #fff;
@@ -231,7 +231,7 @@
             transition: background-color 0.3s;
         }
 
-            .remove-comment-btn:hover {
+            .remove-comment-btn:hover, .remove-pending-btn:hover {
                 background-color: #cc0000; /* Darker red on hover */
             }
 
@@ -293,6 +293,7 @@
         <div class="tabs">
             <div class="tab active" onclick="switchTab('tasks')">Tasks</div>
             <div class="tab" onclick="switchTab('comments')">Comments</div>
+            <div class="tab" onclick="switchTab('pending')">Pending</div>
         </div>
 
         <div id="tasks-container" class="active">
@@ -308,13 +309,95 @@
             <div class="comments-list" id="comments-list"></div>
         </div>
 
+        <div id="pending-container">
+            <div class="pending-input">
+                <input type="text" id="pending-input" placeholder="Add a pending item...">
+                <button onclick="addPending()">Add</button>
+            </div>
+            <div class="pending-list" id="pending-list"></div>
+        </div>
+
         <div class="clear-section">
             <button onclick="clearStorage()">X</button>
         </div>
     </div>
 
     <script>
-        const tasks = ["Medicine", "Fast Food", "Brush", "Tea", "Mrng Walk", "Mrng Water", "Wapp Status", "Bath", "Petrol", "Movie", "Series", "Cold Drink","मास्टर बेसन"];
+        const tasks = ["Medicine", "Fast Food", "Brush", "Tea", "Mrng Walk", "Mrng Water", "Wapp Status", "Bath", "Petrol", "Movie", "Series", "Cold Drink", "Nail Biting"];
+
+        function initializePending() {
+            if (!localStorage.getItem("pending")) {
+                localStorage.setItem("pending", JSON.stringify([]));
+            }
+        }
+
+        function loadPending() {
+            const pendingList = document.getElementById('pending-list');
+            pendingList.innerHTML = '';
+            const pendingItems = JSON.parse(localStorage.getItem("pending")) || [];
+
+            pendingItems.reverse().forEach((item, reversedIndex) => {
+                const index = pendingItems.length - 1 - reversedIndex;
+
+                const pendingItem = document.createElement('div');
+                pendingItem.classList.add('pending-item');
+
+                pendingItem.innerHTML = `
+                            <strong>${item.text}</strong>
+                            <span>${item.date}</span>
+                            <button ondblclick="removePending(${index})" class="remove-pending-btn">x</button>
+                        `;
+
+                pendingItem.addEventListener('dblclick', () => {
+                    document.getElementById('pending-input').value = item.text;
+                });
+
+                pendingList.appendChild(pendingItem);
+            });
+        }
+
+        function addPending() {
+            const pendingInput = document.getElementById('pending-input');
+            const pendingText = pendingInput.value.trim();
+
+            if (pendingText) {
+                const pendingItems = JSON.parse(localStorage.getItem("pending")) || [];
+                const newPending = {
+                    text: pendingText,
+                    date: new Date().toLocaleString()
+                };
+                pendingItems.push(newPending);
+                localStorage.setItem("pending", JSON.stringify(pendingItems));
+
+                pendingInput.value = '';
+                loadPending();
+            }
+        }
+
+        function removePending(index) {
+            const pendingItems = JSON.parse(localStorage.getItem("pending")) || [];
+
+            pendingItems.splice(index, 1);
+            localStorage.setItem("pending", JSON.stringify(pendingItems));
+
+            loadPending();
+        }
+
+        function searchPending() {
+            const searchValue = document.getElementById('search-pending').value.toLowerCase();
+            const pendingList = document.getElementById('pending-list');
+            const pendingItems = JSON.parse(localStorage.getItem("pending")) || [];
+
+            pendingList.innerHTML = '';
+            const filteredPending = pendingItems.filter(item => item.text.toLowerCase().includes(searchValue));
+
+            filteredPending.reverse().forEach(item => {
+                const pendingItem = document.createElement('div');
+                pendingItem.classList.add('pending-item');
+                pendingItem.innerHTML = `<strong>${item.text}</strong><span>${item.date}</span>`;
+                pendingList.appendChild(pendingItem);
+            });
+        }
 
         function initializeTasks() {
             tasks.forEach(task => {
@@ -503,7 +586,7 @@
 
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('#tasks-container, #comments-container').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#tasks-container, #comments-container, #pending-container').forEach(el => el.classList.remove('active'));
 
             if (tab === 'tasks') {
                 document.getElementById('tasks-container').classList.add('active');
@@ -512,14 +595,20 @@
                 document.getElementById('comments-container').classList.add('active');
                 document.querySelector('.tab:nth-child(2)').classList.add('active');
                 loadComments();
+            } else if (tab === 'pending') {
+                document.getElementById('pending-container').classList.add('active');
+                document.querySelector('.tab:nth-child(3)').classList.add('active');
+                loadPending();
             }
         }
 
 
         document.addEventListener('DOMContentLoaded', () => {
             initializeTasks();
+            initializePending();
             loadTasks();
         });
+
     </script>
 </body>
 </html>
