@@ -235,6 +235,54 @@
                 background-color: #cc0000; /* Darker red on hover */
             }
 
+        .task-buttons span {
+            font-size: 14px;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+            .task-buttons span:hover {
+                color: #555;
+            }
+
+        .task {
+            position: relative;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .info-icon {
+            position: absolute;
+            top: -3px;
+            right: 0px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+            .info-icon:hover {
+                color: #333;
+                border-color: #888;
+                background-color: #f0f0f0;
+            }
+
+        .task-buttons {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+
     </style>
 </head>
 <body>
@@ -278,16 +326,30 @@
             if (!localStorage.getItem("comments")) {
                 localStorage.setItem("comments", JSON.stringify([]));
             }
+
+            if (!localStorage.getItem("lastEdited")) {
+                localStorage.setItem("lastEdited", JSON.stringify({}));
+            }
         }
+
 
         function loadTasks() {
             const tasksContainer = document.getElementById('tasks');
             tasksContainer.innerHTML = '';
             tasks.forEach(task => {
                 const taskValue = localStorage.getItem(task) || 0;
+                const lastEdited = JSON.parse(localStorage.getItem("lastEdited")) || {};
 
                 const taskElement = document.createElement('div');
                 taskElement.classList.add('task');
+
+                // Add the info icon at the top-right corner
+                const infoIcon = document.createElement('span');
+                infoIcon.innerHTML = "&#9432;"; // Unicode for info icon
+                infoIcon.classList.add('info-icon');
+                infoIcon.title = "Click to view last edit";
+                infoIcon.addEventListener('click', () => showLastEdit(task));
+                taskElement.appendChild(infoIcon);
 
                 const taskName = document.createElement('p');
                 taskName.textContent = `${task}: ${taskValue}`;
@@ -298,19 +360,40 @@
 
                 const decrementButton = document.createElement('button');
                 decrementButton.textContent = "-";
-                decrementButton.addEventListener('click', () => decrementTask(task, taskName));
+                decrementButton.addEventListener('click', () => {
+                    decrementTask(task, taskName);
+                    updateLastEdited(task);
+                });
                 buttonsContainer.appendChild(decrementButton);
 
                 const incrementButton = document.createElement('button');
                 incrementButton.textContent = "+";
-                incrementButton.addEventListener('click', () => incrementTask(task, taskName));
+                incrementButton.addEventListener('click', () => {
+                    incrementTask(task, taskName);
+                    updateLastEdited(task);
+                });
                 buttonsContainer.appendChild(incrementButton);
-
 
                 taskElement.appendChild(buttonsContainer);
                 tasksContainer.appendChild(taskElement);
             });
         }
+
+
+
+        function updateLastEdited(task) {
+            const lastEdited = JSON.parse(localStorage.getItem("lastEdited")) || {};
+            lastEdited[task] = new Date().toLocaleString();
+            localStorage.setItem("lastEdited", JSON.stringify(lastEdited));
+        }
+
+        function showLastEdit(task) {
+            const lastEdited = JSON.parse(localStorage.getItem("lastEdited")) || {};
+            const timestamp = lastEdited[task] || "No edits yet.";
+            alert(`Last edit for "${task}": ${timestamp}`);
+        }
+
+
 
         function decrementTask(task, taskNameElement) {
             const currentValue = parseInt(localStorage.getItem(task), 10);
